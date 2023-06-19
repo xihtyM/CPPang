@@ -69,23 +69,19 @@ ARGS parse_args(int argc, char *argv[])
     return args;
 }
 
-/// @brief Opens file and reads contents.
-/// @param args Pointer to args struct.
-/// @return Returns contents of file in char *, if file not found, returns null.
 char *open_file(ARGS *args)
 {
-    std::string filename = args->filename;
-    std::string src;
-    char *buf;
-
-    std::ifstream file(filename, std::ios::in | std::ios::ate);
+    std::ifstream file(
+        args->filename,
+        std::ios::in | std::ios::ate);
 
     if (file.is_open())
     {
+        // already at end of file because ios::ate, just tellg and move back
         std::streampos size = file.tellg();
-        buf = new char[size];
-
         file.seekg(0, std::ios::beg);
+
+        char *buf = new char[size];
         file.read(buf, size);
 
         file.close();
