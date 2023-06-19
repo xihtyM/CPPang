@@ -6,14 +6,14 @@ int main(int argc, char *argv[])
 
     ARGS args = parse_args(argc, argv);
 
-    std::cout << args.compiled << '\n'
-              << args.filename << '\n'
-              << args.outname << '\n'
-              << args.to_cpp << '\n'
-              << args.to_asm << '\n'
-              << args.gdb << '\n'
-              << args.keep_temp << '\n'
-              << args.optimisation_level << '\n';
+    char *src = open_file(&args);
+
+    if (!src) {
+        std::cout << "couldn't read file.\n";
+        exit(1);
+    }
+
+    std::cout << src;
 
     return 0;
 }
