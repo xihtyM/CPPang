@@ -1,0 +1,35 @@
+#include "include/pang.hh"
+
+std::ostream &operator<<(std::ostream &os, Token tok)
+{
+    os << "Token(typ=" << static_cast<int>(tok.type)
+       << ", dat=\"" << unescape_string(std::string(tok.raw))
+       << "\")\n";
+    
+    return os;
+}
+
+int main(int argc, char *argv[])
+{
+    set_utf8();
+
+    ARGS args = parse_args(argc, argv);
+
+    char *src = open_file(&args);
+
+    if (!src) {
+        std::cout << "couldn't read file.\n";
+        exit(1);
+    }
+
+    Lexer lex(src, args.filename.c_str());
+
+    lex.get_tokens();
+
+    //for (size_t index = 0; index < lex.toks.size(); index++)
+    //{
+    //    std::cout << lex.toks[index];
+    //}
+
+    return 0;
+}
