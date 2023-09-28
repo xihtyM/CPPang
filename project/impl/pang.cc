@@ -81,6 +81,32 @@ char *open_file(ARGS *args)
     return NULL;
 }
 
+
+std::unordered_set<std::string_view> keywords {
+    // Bitwise operators
+    "xor",  "bor",      "band",
+    "bnot", "lshift",   "rshift",
+
+    // Branches
+    "if", "do", "else", "while",
+
+    // Types
+    "i64",  "i32",   "i16", "i8",
+    "void", "float", "va_args",
+
+    // Operations
+    "add",  "sub",  "mul",   "divmod",
+    "iadd", "isub", "imul",  "drop",
+    "swap", "over", "apply", "quote",
+
+    // Preprocessor
+    "macro", "include",
+
+    // Other
+    "call", "end",
+};
+
+
 bool is_whitespace(char c)
 {
     switch (c)
@@ -154,6 +180,16 @@ bool is_identifier(char c)
         case 'Y':
         case 'Z':
         case '_':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
             return true;
         default:
             return false;
@@ -199,8 +235,18 @@ void Lexer::identifier()
         inc();
         if (ended) return;
     }
+    
+    std::string_view str(start, (src + index) - start);
+
+    if (keywords.find(str) != keywords.end())
+    {
+        toks.push_back(Token(
+            Token::TokenType::Keyword, str));
+        return;
+    }
+
     toks.push_back(Token(
-        Token::TokenType::Identifier, start, (src + index) - start));
+        Token::TokenType::Identifier, str));
 }
 
 
@@ -208,10 +254,30 @@ void Lexer::num()
 {
 
 }
+
 void Lexer::string()
 {
+    inc();
+    const char *start = (src + index);
 
+    while (peek() != '\"') {
+        inc();
+
+        if (ended) {
+            std::cout << "err\n";
+            return;
+        }
+
+        if (peek() == '\"' && src[index - 1] == '\\' && src[index - 2] != '\\')
+            inc();
+    }
+
+    toks.push_back(Token(
+        Token::TokenType::String, start, (src + index) - start));
+    
+    inc();
 }
+
 void Lexer::raw_string()
 {
 
@@ -227,15 +293,65 @@ void Lexer::get_tokens()
             return;
         }
 
-        if (is_identifier(peek())) {
-            identifier();
-            continue;
-        }//} else if (is_num(peek())) {
-        //    num();
-        //    continue;
-        //}
-
         switch (peek()) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+            case 'g':
+            case 'h':
+            case 'i':
+            case 'j':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'q':
+            case 'r':
+            case 's':
+            case 't':
+            case 'u':
+            case 'v':
+            case 'w':
+            case 'x':
+            case 'y':
+            case 'z':
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+            case 'G':
+            case 'H':
+            case 'I':
+            case 'J':
+            case 'K':
+            case 'L':
+            case 'M':
+            case 'N':
+            case 'O':
+            case 'P':
+            case 'Q':
+            case 'R':
+            case 'S':
+            case 'T':
+            case 'U':
+            case 'V':
+            case 'W':
+            case 'X':
+            case 'Y':
+            case 'Z':
+            case '_':
+                identifier();
+                break;
+            case '\"':
+                string();
+                break;
             case '(':
                 atom(Token::TokenType::OpenBracket);
                 break;

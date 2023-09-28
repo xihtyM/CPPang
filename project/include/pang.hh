@@ -5,6 +5,7 @@
 #include <locale.h>
 #include <string.h>
 
+#include <unordered_set>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -83,10 +84,14 @@ class Token
         Token(TokenType tok_type) noexcept : type{tok_type} {}
         Token(TokenType tok_type, const char* beg, std::size_t len) noexcept 
             : type{tok_type}, raw(beg, len) {}
+        Token(TokenType tok_type, std::string_view str) noexcept
+            : type{tok_type}, raw{str} {}
 
         TokenType        type {};
         std::string_view raw  {};
 };
+
+extern std::unordered_set<std::string_view> keywords;
 
 class Lexer
 {

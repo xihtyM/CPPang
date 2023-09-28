@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": ".",
-      "program": "build/Debug/outDebug",
+      "cwd": "c:/Users/tiddl/Desktop/⠀/Programs/C-C++ Projects/CPang",
+      "program": "c:/Users/tiddl/Desktop/⠀/Programs/C-C++ Projects/CPang/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
