@@ -236,17 +236,17 @@ void Lexer::identifier()
         if (ended) return;
     }
     
-    std::string_view str(start, (src + index) - start);
+    std::string_view id(start, (src + index) - start);
 
-    if (keywords.find(str) != keywords.end())
+    if (keywords.find(id) != keywords.end())
     {
         toks.push_back(Token(
-            Token::TokenType::Keyword, str));
+            Token::TokenType::Keyword, id));
         return;
     }
 
     toks.push_back(Token(
-        Token::TokenType::Identifier, str));
+        Token::TokenType::Identifier, id));
 }
 
 
@@ -272,8 +272,29 @@ void Lexer::string()
             inc();
     }
 
+    std::string escaped_string = escape_string(
+        std::string_view(start, (src + index) - start));
+
+    //
+    // copy into char array because when
+    // it goes out of scope it causes
+    // undefined behaivour
+    //
+
+    std::unique_ptr<char[]> dat(new char[escaped_string.length()]);
+    char *save = dat.get();
+    
+    for (char ch: escaped_string)
+    {
+        *save = ch;
+        save++;
+    }
+    
     toks.push_back(Token(
-        Token::TokenType::String, start, (src + index) - start));
+        Token::TokenType::String, 
+            dat.get(),
+            escaped_string.length()
+        ));
     
     inc();
 }

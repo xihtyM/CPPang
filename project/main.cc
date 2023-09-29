@@ -3,7 +3,7 @@
 std::ostream &operator<<(std::ostream &os, Token tok)
 {
     os << "Token(typ=" << static_cast<int>(tok.type)
-       << ", dat=\"" << tok.raw
+       << ", dat=\"" << unescape_string(tok.raw)
        << "\")\n";
     
     return os;
@@ -30,6 +30,8 @@ int main(int argc, char *argv[])
     {
         std::cout << lex.toks[index];
     }
+
+    delete[] src;
 
     return 0;
 }
