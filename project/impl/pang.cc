@@ -2,8 +2,39 @@
 
 char *set_utf8(void)
 {
-    return setlocale(
-        LC_ALL, ".utf-8");
+    const char *locales[] = {
+        // try common utf-8 locales
+        ".utf-8",
+        ".utf8",
+
+        // maybe case sensitive
+        ".UTF-8",
+        ".UTF8",
+        
+        // maybe works like codepages
+        // in some weird examples
+        ".65001",
+        
+        // try with language
+        "en-US.utf-8",
+        "en-GB.utf-8",
+        "en_US.utf-8",
+        "en_GB.utf-8",
+
+        // if it reaches here, there
+        // is probably no utf-8 support
+        NULL,
+    };
+
+    for (int8_t index = 0; locales[index]; index++) {
+        char *ret = setlocale(LC_ALL, locales[index]);
+
+        if (ret) {
+            return ret;
+        }
+    }
+    
+    return NULL;
 }
 
 bool arg_equ(char *src, std::string comp)
@@ -72,6 +103,17 @@ char *open_file(ARGS *args)
 
         char *buf = new char[size];
         file.read(buf, size);
+
+        //
+        // used to presume null terminator
+        // was automatically added.
+        //
+        // but is now is required as previously
+        // there would be issues of undefined
+        // behaivour on the last few characters.
+        //
+
+        buf[size] = '\x00';
 
         file.close();
 
@@ -200,8 +242,6 @@ bool is_num(char c)
 {
     switch (c)
     {
-        case '+':
-        case '-':
         case '0':
         case '1':
         case '2':
@@ -215,185 +255,5 @@ bool is_num(char c)
             return true;
         default:
             return false;
-    }
-}
-
-void Lexer::skip_whitespace()
-{
-    while (is_whitespace(peek())) {
-        inc();
-        if (ended) return;
-    }
-}
-
-
-void Lexer::identifier()
-{
-    const char *start = (src + index);
-    inc();
-    while (is_identifier(peek())) {
-        inc();
-        if (ended) return;
-    }
-    
-    std::string_view id(start, (src + index) - start);
-
-    if (keywords.find(id) != keywords.end())
-    {
-        toks.push_back(Token(
-            Token::TokenType::Keyword, id));
-        return;
-    }
-
-    toks.push_back(Token(
-        Token::TokenType::Identifier, id));
-}
-
-
-void Lexer::num()
-{
-
-}
-
-void Lexer::string()
-{
-    inc();
-    const char *start = (src + index);
-
-    while (peek() != '\"') {
-        inc();
-
-        if (ended) {
-            std::cout << "err\n";
-            return;
-        }
-
-        if (peek() == '\"' && src[index - 1] == '\\' && src[index - 2] != '\\')
-            inc();
-    }
-
-    std::string escaped_string = escape_string(
-        std::string_view(start, (src + index) - start));
-
-    //
-    // copy into char array because when
-    // it goes out of scope it causes
-    // undefined behaivour
-    //
-
-    std::unique_ptr<char[]> dat(new char[escaped_string.length()]);
-    char *save = dat.get();
-    
-    for (char ch: escaped_string)
-    {
-        *save = ch;
-        save++;
-    }
-    
-    toks.push_back(Token(
-        Token::TokenType::String, 
-            dat.get(),
-            escaped_string.length()
-        ));
-    
-    inc();
-}
-
-void Lexer::raw_string()
-{
-
-}
-
-void Lexer::get_tokens()
-{
-    while (!ended) {
-        skip_whitespace();
-
-        if (ended)
-        {
-            return;
-        }
-
-        switch (peek()) {
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e':
-            case 'f':
-            case 'g':
-            case 'h':
-            case 'i':
-            case 'j':
-            case 'k':
-            case 'l':
-            case 'm':
-            case 'n':
-            case 'o':
-            case 'p':
-            case 'q':
-            case 'r':
-            case 's':
-            case 't':
-            case 'u':
-            case 'v':
-            case 'w':
-            case 'x':
-            case 'y':
-            case 'z':
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-            case 'G':
-            case 'H':
-            case 'I':
-            case 'J':
-            case 'K':
-            case 'L':
-            case 'M':
-            case 'N':
-            case 'O':
-            case 'P':
-            case 'Q':
-            case 'R':
-            case 'S':
-            case 'T':
-            case 'U':
-            case 'V':
-            case 'W':
-            case 'X':
-            case 'Y':
-            case 'Z':
-            case '_':
-                identifier();
-                break;
-            case '\"':
-                string();
-                break;
-            case '(':
-                atom(Token::TokenType::OpenBracket);
-                break;
-            case ')':
-                atom(Token::TokenType::CloseBracket);
-                break;
-            case '<':
-                atom(Token::TokenType::LessThan);
-                break;
-            case '>':
-                atom(Token::TokenType::GreaterThan);
-                break;
-            case '=':
-                atom(Token::TokenType::Equal);
-                break;
-            case '!':
-                atom(Token::TokenType::NotEqual);
-                break;
-            default:
-                inc();
-                break;
-        }
     }
 }

@@ -11,7 +11,12 @@ std::ostream &operator<<(std::ostream &os, Token tok)
 
 int main(int argc, char *argv[])
 {
-    set_utf8();
+    if (!set_utf8())
+    {
+        std::cout << "Couldn't change the locale setting to utf-8.\n\n"
+                  << "If this causes unexpected errors,\n"
+                  << "try opening an issue on the github repo.\n";
+    }
 
     ARGS args = parse_args(argc, argv);
 

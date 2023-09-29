@@ -1,1 +1,6 @@
 "Hello, World!\n" call puts
+0x123
+0o123
+-0x123
++0o123
+test
